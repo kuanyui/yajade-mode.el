@@ -88,6 +88,7 @@
 
 (setq jade-font-lock-keywords
       `(
+        ("<.+?>" . font-lock-function-name-face)
         (,jade-keywords . font-lock-keyword-face) ;; keywords
         (,jade-id-re . font-lock-keyword-face) ;; id
         (,jade-class-re 1 font-lock-type-face) ;; class name
