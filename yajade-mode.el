@@ -148,7 +148,7 @@
         (,yajade-mixin-re 0 font-lock-constant-face)
         ("disabled" 0 font-lock-warning-face)
         ("\\(?:false\\|null\\|true\\|undefined\\)" 0 font-lock-constant-face)
-        ("[-+]?\\(?:[0-9]+.[0-9]+\\|.?[0-9]+\\)" 0 font-lock-constant-face)
+        ("[-+]?\\(?:[0-9]+[.][0-9]+\\|[.]?[0-9]+\\)" 0 font-lock-constant-face)
         ("^ *\\([=-]\\)" 0 font-lock-preprocessor-face)
         ("#{.+?}" 0 font-lock-preprocessor-face)
         ("^ *\\(|.+\\)" 1 font-lock-string-face t) ;  plain text (start with /^ *\|/)
