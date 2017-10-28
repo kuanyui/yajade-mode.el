@@ -19,11 +19,21 @@ html(lang="en", class = ['classOne', 'classTwo'].join(','))
         - if (youAreUsingJade)
           p You are amazing
         - else
-          p Get on it!
+          p Get on it! #{foobar}
           form
             input(type = "text", name='user[name]', readonly = true, disabled)
+        vue-component-demo(
+          // In face, Jade / Pug doesn't allow comment in element's attr list.
+          x= 2.8
+          y= 4+5 +.5 + 'px'
+          z = -5 -3   // NOTICE: tag syntax is unsolvable with Emacs's syntax table.(because cannot know wether within attr list)
+          v-bind:show.sync="alertData.show"
+          v-bind:duration="1000"
+          @click="hello"
+          placement="top-right"
+          dismissable)
         div#single-quote.example
-          = 'this single quote should highlight as a string'
+          = 'this true single quote should highlight as a string'
           = 'this one' + "and this should too"
           span= 'another' + "quote example" + "(NOTICE: This syntax highlight is sacrificed in yajade-mode due to the limitation of Emacs's syntax engine)"
           span() this one shouldn't higlight strings or... .other #things if else

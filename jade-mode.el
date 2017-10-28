@@ -1,13 +1,9 @@
-;;; yajade-mode.el --- Major mode for editing Jade / Pug files
+;;; jade-mode.el --- Major mode for editing .jade files
 ;;;
-;;; Author:
-
-;;; Forked from Brian M. Carlson's jade-mode:
-;;; https://github.com/brianc/jade-mode
-
-
+;;; URL: https://github.com/brianc/jade-mode
+;;; Author: Brian M. Carlson and other contributors
+;;; inspired by http://xahlee.org/emacs/elisp_syntax_coloring.html
 (require 'font-lock)
-
 (require 'js)
 
 (defvar jade-tab-width)
@@ -62,78 +58,74 @@
 (defconst jade-keywords
   (eval-when-compile
     (regexp-opt
-     '("if" "else" "for" "in" "each" "case" "when" "default" "block" "extends" "var"
+     '("if" "else" "for" "in" "each" "case" "when" "default" "block" "extends"
        "block append" "block prepend" "append" "prepend"
        "include" "yield" "mixin") 'words))
   "Jade keywords.")
 
-(setq jade-tag-re "^ *[A-z][A-z0-9-_]*")  ; [TODO] tag1: tag2(...)
-"Regexp used to match a basic html tag, e.g. link, a, div"
+(defvar jade-tag-re "[a-z][a-z0-9]*"
+  "Regexp used to match a basic html tag, e.g. link, a, div")
 
-(setq jade-id-re "#[a-zA-Z][0-9a-zA-Z_-]*")
-"Regexp used to match an ID literal, e.g. #id, #id-one_23"
+(defvar jade-id-re "#[a-zA-Z][0-9a-zA-Z_\\-]*"
+  "Regexp used to match an ID literal, e.g. #id, #id-one_23")
 
-(setq jade-class-re "^ *\\(?:[A-z0-9_-]*\\)?\\([.][a-zA-Z][0-9a-zA-Z_.-]*\\)")
-"Regexp used to match a class literal, e.g. .class, .class_name-123"
+(defvar jade-class-re "[.][a-zA-Z][0-9a-zA-Z_\\-]*"
+  "Regexp used to match a class literal, e.g. .class, .class_name-123")
 
-(setq jade-mixin-re "^ *[+][a-zA-Z][0-9a-zA-Z_-]*")
-"Regexp used to match a mixin name"
+(defvar jade-mixin-re "[+][a-zA-Z][0-9a-zA-Z_\\-]*"
+  "Regexp used to match a mixin name")
 
-(setq jade-double-quote-string-re "[\"]\\(\\\\.\\|[^\"\n]\\)*[\"]")
-"Regexp used to match a double-quoted string literal"
+(defvar jade-double-quote-string-re "[\"]\\(\\\\.\\|[^\"\n]\\)*[\"]"
+  "Regexp used to match a double-quoted string literal")
 
-(setq jade-single-quote-string-re "[']\\(\\\\.\\|[^'\n]\\)*[']")
-"Regexp used to match a single-quoted string literal"
+(defvar jade-single-quote-string-re "[']\\(\\\\.\\|[^'\n]\\)*[']"
+  "Regexp used to match a single-quoted string literal")
 
-(setq jade-tag-declaration-char-re "[-a-zA-Z0-9_.#+]")
-"Regexp used to match a character in a tag declaration"
+(defvar jade-tag-declaration-char-re "[-a-zA-Z0-9_.#+]"
+  "Regexp used to match a character in a tag declaration")
 
-(setq jade-attr-re "\\([A-z_-][A-z0-9_:-]*\\)=")
+(defvar jade-font-lock-keywords
+  `(
+    (,jade-keywords . font-lock-keyword-face) ;; keywords
+    (,jade-id-re . font-lock-variable-name-face) ;; id
+    (,jade-class-re . font-lock-type-face) ;; class name
+    (,jade-tag-re . font-lock-function-name-face)
+    (,jade-mixin-re 0 font-lock-constant-face t)
+    ("\\(-?//.*\\)" 1 font-lock-comment-face t) ;; jade block comments
+    ;; tag name
 
-(setq jade-font-lock-keywords
-      `(
-        ("<.+?>" . font-lock-function-name-face)
-        (,jade-keywords . font-lock-keyword-face) ;; keywords
-        (,jade-id-re . font-lock-keyword-face) ;; id
-        (,jade-class-re 1 font-lock-type-face) ;; class name
-        (,jade-attr-re 1 font-lock-variable-name-face t) ;; attribute name
-        (,jade-tag-re . font-lock-function-name-face)
-        (,jade-mixin-re 0 font-lock-constant-face)
-        ("\\(-?//.*\\)" 1 font-lock-comment-face t) ;; jade block comments (t means force even if face existed)
-        ;; tag name
+    ;; remove highlighting from literal content following tag/class/id
+    ;; e.g. tag Inner text
+    ;;      tag#id.class INNER text
+    (,(concat "^\\s-*"
 
-        ;; remove highlighting from literal content following tag/class/id
-        ;; e.g. tag Inner text
-        ;;      tag#id.class INNER text
-        (,(concat "^\\s-*"
+              ;; start with a basic html tag, an ID, or a class
+              "\\(" jade-tag-re "\\|" jade-id-re "\\|" jade-class-re "\\)"
 
-                  ;; start with a basic html tag, an ID, or a class
-                  "\\(" jade-tag-re "\\|" jade-id-re "\\|" jade-class-re "\\)"
+              ;; followed by zero or more of either an ID or a class
+              "\\(" jade-id-re "\\|" jade-class-re "\\)*"
 
-                  ;; followed by zero or more of either an ID or a class
-                  "\\(" jade-id-re "\\|" jade-class-re "\\)*"
+              ;; then an optional set of parens with JS inside
+              ;; TODO highlight JS in a meaningful way
+              "\\(" "(.*)" "\\)?"
 
-                  ;; then an optional set of parens with JS inside
-                  ;; TODO highlight JS in a meaningful way
-                  "\\(" "(.*)" "\\)?"
+              ;; then a space (not an equals sign), and match the rest of the line
+              ;; and remove any font-lock faces applied
+              "[ ]\\(.+\\)") 4 nil t)
 
-                  ;; then a space (not an equals sign), and match the rest of the line
-                  ;; and remove any font-lock faces applied
-                  "[ ]\\(.+\\)") 4 nil t)
+    ;; remove highlighting from lines opening with a pipe `|'
+    ;; e.g. | keywords like for should not be highlighted here
+    ;;      | I'm not supposed to highlight single quotes either
+    (,(concat "^[ \t]*" "\\(" "|.*" "\\)") 1 nil t)
 
-        ;; remove highlighting from lines opening with a pipe `|'
-        ;; e.g. | keywords like for should not be highlighted here
-        ;;      | I'm not supposed to highlight single quotes either
-        (,(concat "^[ \t]*" "\\(" "|.*" "\\)") 1 nil t)
+    ;; we abuse font-lock a bit here; these functions inject js-mode
+    ;; highlighting under the guise of matching text for more standard
+    ;; font-lock face application (like we do with regexps above)
+    (jade-highlight-js-in-parens 1 font-lock-preprocessor-face)
+    (jade-highlight-js-after-tag 1 font-lock-preprocessor-face)
 
-        ;; we abuse font-lock a bit here; these functions inject js-mode
-        ;; highlighting under the guise of matching text for more standard
-        ;; font-lock face application (like we do with regexps above)
-        ;; (jade-highlight-js-in-parens 1 font-lock-preprocessor-face)
-        ;; (jade-highlight-js-after-tag 1 font-lock-preprocessor-face)
-
-        ;; doctype re-overrides some of the fontification rules
-        ("^!!!\\|doctype[ ]?.*" 0 font-lock-comment-face t)))
+    ;; doctype re-overrides some of the fontification rules
+    ("^!!!\\|doctype[ ]?.*" 0 font-lock-comment-face t)))
 
 (defun jade-highlight-js-in-parens (limit)
   "Search for a tag declaration (up to LIMIT) which contains a paren
@@ -187,24 +179,13 @@ declaration"
       (forward-sexp 1)))
 
 
-;; (defvar jade-syntax-table
-;;   (let ((table (make-syntax-table)))
-;;     (modify-syntax-entry ?\" "\"" table)
-;;     (modify-syntax-entry ?\' "\"" table)
-;;     (modify-syntax-entry ?_ "w" table)
-;;     table)
-;;   "Syntax table for `jade-mode'.")
-
-(setq jade-syntax-table
-      (let ((table (make-syntax-table)))
-        (modify-syntax-entry ?\" "\"" table)
-        (modify-syntax-entry ?\' "\"" table)
-        (modify-syntax-entry ?_ "w" table)
-        (modify-syntax-entry ?- "w" table)
-        table)
-      )
-
-
+(defvar jade-syntax-table
+  (let ((table (make-syntax-table)))
+    (modify-syntax-entry ?\" "\"" table)
+    (modify-syntax-entry ?\' "\"" table)
+    (modify-syntax-entry ?_ "w" table)
+    table)
+  "Syntax table for `jade-mode'.")
 
 (defun jade-region-for-sexp ()
   "Selects the current sexp as the region"
@@ -407,7 +388,7 @@ region defined by BEG and END."
   (define-key jade-mode-map (kbd "RET") 'jade-newline-and-indent)
 
   ;; highlight keywords, ignore syntactic font-lock
-  (setq font-lock-defaults '(jade-font-lock-keywords nil nil)))
+  (setq font-lock-defaults '(jade-font-lock-keywords t)))
 
 
 ;;;###autoload
