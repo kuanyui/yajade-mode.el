@@ -58,12 +58,12 @@
 (defconst jade-keywords
   (eval-when-compile
     (regexp-opt
-     '("if" "else" "for" "in" "each" "case" "when" "default" "block" "extends"
+     '("if" "else" "for" "in" "each" "case" "when" "default" "block" "extends" "var"
        "block append" "block prepend" "append" "prepend"
        "include" "yield" "mixin") 'words))
   "Jade keywords.")
 
-(setq jade-tag-re "^ *[A-z][A-z0-9-_]*")
+(setq jade-tag-re "^ *[A-z][A-z0-9-_]*")  ; [TODO] tag1: tag2(...)
 "Regexp used to match a basic html tag, e.g. link, a, div"
 
 (setq jade-id-re "#[a-zA-Z][0-9a-zA-Z_-]*")
