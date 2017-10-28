@@ -63,16 +63,16 @@
        "include" "yield" "mixin") 'words))
   "Jade keywords.")
 
-(setq jade-tag-re "^ +[][A-z][A-z0-9-_]*")
+(setq jade-tag-re "^ *[A-z][A-z0-9-_]*")
 "Regexp used to match a basic html tag, e.g. link, a, div"
 
 (setq jade-id-re "#[a-zA-Z][0-9a-zA-Z_-]*")
 "Regexp used to match an ID literal, e.g. #id, #id-one_23"
 
-(setq jade-class-re "^ *[.][a-zA-Z][0-9a-zA-Z_.-]*")
+(setq jade-class-re "^ *\\(?:[A-z0-9_-]*\\)?\\([.][a-zA-Z][0-9a-zA-Z_.-]*\\)")
 "Regexp used to match a class literal, e.g. .class, .class_name-123"
 
-(setq jade-mixin-re "[+][a-zA-Z][0-9a-zA-Z_-]*")
+(setq jade-mixin-re "^ *[+][a-zA-Z][0-9a-zA-Z_-]*")
 "Regexp used to match a mixin name"
 
 (setq jade-double-quote-string-re "[\"]\\(\\\\.\\|[^\"\n]\\)*[\"]")
@@ -84,14 +84,17 @@
 (setq jade-tag-declaration-char-re "[-a-zA-Z0-9_.#+]")
 "Regexp used to match a character in a tag declaration"
 
+(setq jade-attr-re "\\([A-z_-][A-z0-9_-]*\\)=")
+
 (setq jade-font-lock-keywords
       `(
         (,jade-keywords . font-lock-keyword-face) ;; keywords
-        (,jade-id-re . font-lock-variable-name-face) ;; id
-        (,jade-class-re . font-lock-type-face) ;; class name
+        (,jade-id-re . font-lock-keyword-face) ;; id
+        (,jade-class-re 1 font-lock-type-face) ;; class name
+        (,jade-attr-re 1 font-lock-variable-name-face t) ;; attribute name
         (,jade-tag-re . font-lock-function-name-face)
-        (,jade-mixin-re 0 font-lock-constant-face t)
-        ("\\(-?//.*\\)" 1 font-lock-comment-face t) ;; jade block comments
+        (,jade-mixin-re 0 font-lock-constant-face)
+        ("\\(-?//.*\\)" 1 font-lock-comment-face t) ;; jade block comments (t means force even if face existed)
         ;; tag name
 
         ;; remove highlighting from literal content following tag/class/id
