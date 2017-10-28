@@ -114,7 +114,7 @@
        "include" "yield" "mixin") 'words))
   "Yajade keywords.")
 
-(setq yajade-tag-re "^ *[A-z][A-z0-9-_]*")  ; [TODO] tag1: tag2(...)
+(setq yajade-tag-re "^ *\\([A-z][A-z0-9-_]*\\)[( .#\n]")  ; [TODO] tag1: tag2(...)
 "Regexp used to match a basic html tag, e.g. link, a, div"
 
 (setq yajade-id-re "^ *\\(?:[.A-z0-9_-]*\\)?\\(#[a-zA-Z][0-9a-zA-Z_-]*\\)")
@@ -135,18 +135,20 @@
 (setq yajade-tag-declaration-char-re "[-a-zA-Z0-9_.#+]")
 "Regexp used to match a character in a tag declaration"
 
-(setq yajade-attr-re "\\([A-z_-][A-z0-9_:-]*\\) *?=")
+(setq yajade-attr-re "\\([A-z_-][A-z0-9_:.-]*\\) *?=")
 
 (setq yajade-font-lock-keywords
       `(
         ("<.+?>" . font-lock-function-name-face)
-        (,yajade-tag-re . font-lock-function-name-face)
+        (,yajade-tag-re 1 font-lock-function-name-face)
         (,yajade-keywords . font-lock-keyword-face)
         (,yajade-id-re 1 font-lock-keyword-face)
         (,yajade-class-re 1 font-lock-type-face)
         (,yajade-attr-re 1 font-lock-variable-name-face)
         (,yajade-mixin-re 0 font-lock-constant-face)
-        ("^ *\\(|.+\\)" 1 nil t)
+        ("#{.+?}" 0 font-lock-preprocessor-face)
+        ("^ *\\(|.+\\)" 1 font-lock-string-face t) ;  plain text (start with /^ *\|/)
+        ("^ *[#.A-z0-9_-]+(.*)\\(.+\\)" 1 nil t)  ; plain text
         ("^!!!\\|doctype[ ]?.*" 0 font-lock-comment-face t)))
 
 (defun yajade-highlight-js-in-parens (limit)
