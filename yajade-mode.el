@@ -94,6 +94,7 @@
         (modify-syntax-entry ?\' "\"" table)
         (modify-syntax-entry ?_ "w" table)
         (modify-syntax-entry ?- "w" table)
+        ;;(modify-syntax-entry ?| "|" table)
         table)
       )
 
@@ -137,7 +138,8 @@
         (,yajade-attr-re 1 font-lock-variable-name-face) ;; attribute name
         (,yajade-tag-re . font-lock-function-name-face)
         (,yajade-mixin-re 0 font-lock-constant-face)
-        ("\\(-?//.*\\)" 1 font-lock-comment-face t) ;; jade block comments (t means force even if face existed)
+                                        ; ("\\(-?//.*\\)" 1 font-lock-comment-face t) ;; jade
+        ("^ *\\(-?//.*\\)" 1 font-lock-comment-face t) ;; jade block comments (t means force even if face existed)
         ;; tag name
 
         ;; remove highlighting from literal content following tag/class/id
