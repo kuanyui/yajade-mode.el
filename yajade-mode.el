@@ -135,7 +135,7 @@
 (setq yajade-tag-declaration-char-re "[-a-zA-Z0-9_.#+]")
 "Regexp used to match a character in a tag declaration"
 
-(setq yajade-attr-re "\\([A-z_-][A-z0-9_:.-]*\\) *?=")
+(setq yajade-attr-re "\\([A-z_:.@-][A-z0-9_:.@-]*\\) *?=")
 
 (setq yajade-font-lock-keywords
       `(
