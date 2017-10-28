@@ -179,13 +179,25 @@ declaration"
       (forward-sexp 1)))
 
 
-(defvar jade-syntax-table
-  (let ((table (make-syntax-table)))
-    (modify-syntax-entry ?\" "\"" table)
-    (modify-syntax-entry ?\' "\"" table)
-    (modify-syntax-entry ?_ "w" table)
-    table)
-  "Syntax table for `jade-mode'.")
+;; (defvar jade-syntax-table
+;;   (let ((table (make-syntax-table)))
+;;     (modify-syntax-entry ?\" "\"" table)
+;;     (modify-syntax-entry ?\' "\"" table)
+;;     (modify-syntax-entry ?_ "w" table)
+;;     table)
+;;   "Syntax table for `jade-mode'.")
+
+(setq jade-syntax-table
+      (let ((table (make-syntax-table)))
+        (modify-syntax-entry ?\" "\"" table)
+        (modify-syntax-entry ?\' "\"" table)
+        (modify-syntax-entry ?\\ "\\" table)
+        (modify-syntax-entry ?_ "w" table)
+        (modify-syntax-entry ?- "w" table)
+        table)
+      )
+
+
 
 (defun jade-region-for-sexp ()
   "Selects the current sexp as the region"
