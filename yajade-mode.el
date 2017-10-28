@@ -92,8 +92,10 @@
       (let ((table (make-syntax-table)))
         (modify-syntax-entry ?\" "\"" table)
         (modify-syntax-entry ?\' "\"" table)
-        (modify-syntax-entry ?_ "w" table)
-        (modify-syntax-entry ?- "w" table)
+        (modify-syntax-entry ?_ "w" table)    ; _ is part of a symbol
+        (modify-syntax-entry ?- "w" table)    ; - is part of a symbol
+        (modify-syntax-entry ?/ "<12" table)  ; // is begin of comment
+        (modify-syntax-entry ?\n ">" table)   ; \n is end of comment
         ;;(modify-syntax-entry ?| "|" table)
         table)
       )
@@ -139,7 +141,7 @@
         (,yajade-tag-re . font-lock-function-name-face)
         (,yajade-mixin-re 0 font-lock-constant-face)
                                         ; ("\\(-?//.*\\)" 1 font-lock-comment-face t) ;; jade
-        ("^ *\\(-?//.*\\)" 1 font-lock-comment-face t) ;; jade block comments (t means force even if face existed)
+        ;;("^ *\\(-?//.*\\)" 1 font-lock-comment-face t) ;; jade block comments (t means force even if face existed)
         ;; tag name
 
         ;; remove highlighting from literal content following tag/class/id
