@@ -25,7 +25,7 @@ html(lang="en", class = ['classOne', 'classTwo'].join(','))
         div#single-quote.example
           = 'this single quote should highlight as a string'
           = 'this one' + "and this should too"
-          span= 'another' + "quote example"
+          span= 'another' + "quote example" + "(NOTICE: This syntax highlight is sacrificed in yajade-mode due to the limitation of Emacs's syntax engine)"
           span() this one shouldn't higlight strings or... .other #things if else
           | this one shouldn't highlight strings, and the same goes for .keywords #ok ?
         div#paren.content.example(style = 'float: left;') Content .here #should be plain if for // not a comment

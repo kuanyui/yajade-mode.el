@@ -146,6 +146,7 @@
         (,yajade-class-re 1 font-lock-type-face)
         (,yajade-attr-re 1 font-lock-variable-name-face)
         (,yajade-mixin-re 0 font-lock-constant-face)
+        ("^ *\\([=-]\\)" 0 font-lock-preprocessor-face)
         ("#{.+?}" 0 font-lock-preprocessor-face)
         ("^ *\\(|.+\\)" 1 font-lock-string-face t) ;  plain text (start with /^ *\|/)
         ("^ *[#.A-z0-9_-]+(.*)\\(.+\\)" 1 nil t)  ; plain text
