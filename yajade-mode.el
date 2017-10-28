@@ -88,6 +88,15 @@
     (comment-or-uncomment-region start end)
     (forward-line)))
 
+(setq yajade-syntax-table
+      (let ((table (make-syntax-table)))
+        (modify-syntax-entry ?\" "\"" table)
+        (modify-syntax-entry ?\' "\"" table)
+        (modify-syntax-entry ?_ "w" table)
+        (modify-syntax-entry ?- "w" table)
+        table)
+      )
+
 (defconst yajade-keywords
   (eval-when-compile
     (regexp-opt
@@ -99,10 +108,10 @@
 (setq yajade-tag-re "^ *[A-z][A-z0-9-_]*")  ; [TODO] tag1: tag2(...)
 "Regexp used to match a basic html tag, e.g. link, a, div"
 
-(setq yajade-id-re "#[a-zA-Z][0-9a-zA-Z_-]*")
+(setq yajade-id-re "^ *\\(?:[.A-z0-9_-]*\\)?\\(#[a-zA-Z][0-9a-zA-Z_-]*\\)")
 "Regexp used to match an ID literal, e.g. #id, #id-one_23"
 
-(setq yajade-class-re "^ *\\(?:[A-z0-9_-]*\\)?\\([.][a-zA-Z][0-9a-zA-Z_.-]*\\)")
+(setq yajade-class-re "^ *\\(?:[#A-z0-9_-]*\\)?\\([.][a-zA-Z][0-9a-zA-Z_.-]*\\)")
 "Regexp used to match a class literal, e.g. .class, .class_name-123"
 
 (setq yajade-mixin-re "^ *[+][a-zA-Z][0-9a-zA-Z_-]*")
@@ -123,7 +132,7 @@
       `(
         ("<.+?>" . font-lock-function-name-face)
         (,yajade-keywords . font-lock-keyword-face) ;; keywords
-        (,yajade-id-re . font-lock-keyword-face) ;; id
+        (,yajade-id-re 1 font-lock-keyword-face) ;; id
         (,yajade-class-re 1 font-lock-type-face) ;; class name
         (,yajade-attr-re 1 font-lock-variable-name-face t) ;; attribute name
         (,yajade-tag-re . font-lock-function-name-face)
@@ -216,22 +225,7 @@ declaration"
       (forward-sexp 1)))
 
 
-;; (defvar yajade-syntax-table
-;;   (let ((table (make-syntax-table)))
-;;     (modify-syntax-entry ?\" "\"" table)
-;;     (modify-syntax-entry ?\' "\"" table)
-;;     (modify-syntax-entry ?_ "w" table)
-;;     table)
-;;   "Syntax table for `yajade-mode'.")
 
-(setq yajade-syntax-table
-      (let ((table (make-syntax-table)))
-        (modify-syntax-entry ?\" "\"" table)
-        (modify-syntax-entry ?\' "\"" table)
-        (modify-syntax-entry ?_ "w" table)
-        (modify-syntax-entry ?- "w" table)
-        table)
-      )
 
 
 
