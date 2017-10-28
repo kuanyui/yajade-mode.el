@@ -140,47 +140,13 @@
 (setq yajade-font-lock-keywords
       `(
         ("<.+?>" . font-lock-function-name-face)
-        (,yajade-keywords . font-lock-keyword-face) ;; keywords
-        (,yajade-id-re 1 font-lock-keyword-face) ;; id
-        (,yajade-class-re 1 font-lock-type-face) ;; class name
-        (,yajade-attr-re 1 font-lock-variable-name-face) ;; attribute name
         (,yajade-tag-re . font-lock-function-name-face)
+        (,yajade-keywords . font-lock-keyword-face)
+        (,yajade-id-re 1 font-lock-keyword-face)
+        (,yajade-class-re 1 font-lock-type-face)
+        (,yajade-attr-re 1 font-lock-variable-name-face)
         (,yajade-mixin-re 0 font-lock-constant-face)
-                                        ; ("\\(-?//.*\\)" 1 font-lock-comment-face t) ;; jade
-        ;;("^ *\\(-?//.*\\)" 1 font-lock-comment-face t) ;; jade block comments (t means force even if face existed)
-        ;; tag name
-
-        ;; remove highlighting from literal content following tag/class/id
-        ;; e.g. tag Inner text
-        ;;      tag#id.class INNER text
-        (,(concat "^\\s-*"
-
-                  ;; start with a basic html tag, an ID, or a class
-                  "\\(" yajade-tag-re "\\|" yajade-id-re "\\|" yajade-class-re "\\)"
-
-                  ;; followed by zero or more of either an ID or a class
-                  "\\(" yajade-id-re "\\|" yajade-class-re "\\)*"
-
-                  ;; then an optional set of parens with JS inside
-                  ;; TODO highlight JS in a meaningful way
-                  "\\(" "(.*)" "\\)?"
-
-                  ;; then a space (not an equals sign), and match the rest of the line
-                  ;; and remove any font-lock faces applied
-                  "[ ]\\(.+\\)") 4 nil t)
-
-        ;; remove highlighting from lines opening with a pipe `|'
-        ;; e.g. | keywords like for should not be highlighted here
-        ;;      | I'm not supposed to highlight single quotes either
-        (,(concat "^[ \t]*" "\\(" "|.*" "\\)") 1 nil t)
-
-        ;; we abuse font-lock a bit here; these functions inject js-mode
-        ;; highlighting under the guise of matching text for more standard
-        ;; font-lock face application (like we do with regexps above)
-        ;; (yajade-highlight-js-in-parens 1 font-lock-preprocessor-face)
-        ;; (yajade-highlight-js-after-tag 1 font-lock-preprocessor-face)
-
-        ;; doctype re-overrides some of the fontification rules
+        ("^ *\\(|.+\\)" 1 nil t)
         ("^!!!\\|doctype[ ]?.*" 0 font-lock-comment-face t)))
 
 (defun yajade-highlight-js-in-parens (limit)
