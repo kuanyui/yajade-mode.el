@@ -400,7 +400,7 @@ region defined by BEG and END."
   (define-key jade-mode-map (kbd "RET") 'jade-newline-and-indent)
 
   ;; highlight keywords, ignore syntactic font-lock
-  (setq font-lock-defaults '(jade-font-lock-keywords t)))
+  (setq font-lock-defaults '(jade-font-lock-keywords nil nil)))
 
 
 ;;;###autoload
