@@ -126,7 +126,7 @@
 (setq yajade-tag-declaration-char-re "[-a-zA-Z0-9_.#+]")
 "Regexp used to match a character in a tag declaration"
 
-(setq yajade-attr-re "\\([A-z_-][A-z0-9_:-]*\\)=")
+(setq yajade-attr-re "\\([A-z_-][A-z0-9_:-]*\\) *?=")
 
 (setq yajade-font-lock-keywords
       `(
@@ -134,7 +134,7 @@
         (,yajade-keywords . font-lock-keyword-face) ;; keywords
         (,yajade-id-re 1 font-lock-keyword-face) ;; id
         (,yajade-class-re 1 font-lock-type-face) ;; class name
-        (,yajade-attr-re 1 font-lock-variable-name-face t) ;; attribute name
+        (,yajade-attr-re 1 font-lock-variable-name-face) ;; attribute name
         (,yajade-tag-re . font-lock-function-name-face)
         (,yajade-mixin-re 0 font-lock-constant-face)
         ("\\(-?//.*\\)" 1 font-lock-comment-face t) ;; jade block comments (t means force even if face existed)
