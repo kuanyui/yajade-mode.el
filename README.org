@@ -17,5 +17,5 @@ It's impossible to fix currently unless GNU Emacs improves its syntax APIs, or w
 #+END_QUOTE
 
 - [[http://jadelang.net/reference/code/][Buffered code]] is wrongly highlighted. I've ever tried to solve this with =yajade--font-lock-attr= function, but font-lock act more bizarre than JoJo's Bizarre Adventure.
-- Nested tags is not handled. Same reason as =buffered code=.
+- Highlight for [[http://jadelang.net/reference/tags/][nested tags]] (e.g. =a: img=) is not handled. Same reason as =buffered code=.
 - Multi-line string block is not handled.
