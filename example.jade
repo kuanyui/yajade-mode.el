@@ -1,5 +1,5 @@
 doctype html
-html(lang="en", class = ['classOne', 'classTwo'].join(','))
+html(lang="en", class = ['classOne', 'classTwo'].join(','))  // this should be interpretered as plain text
   -// consult http://jade-lang.com for a full language reference
   head
     title My page
@@ -15,7 +15,7 @@ html(lang="en", class = ['classOne', 'classTwo'].join(','))
         //- here is a unbuffered comment syntax
         -// comment after dash (I think the dash is not the part of comment.)
         a(href = 'http://www.google.com') http://www.google.com
-        a: span(a=1 b="b")
+        a: span(a=1 b="b") this is so complexed to solve this in // Emacs
         span / this is NOT a comment
         - if (youAreUsingJade)
           p You are amazing
@@ -23,7 +23,9 @@ html(lang="en", class = ['classOne', 'classTwo'].join(','))
           p Get on it! #{foobar}
           form
             input(type = "text", name='user[name]', readonly = true, disabled, wtf='a' stroke='a')
-        Vue-component-demo(
+
+        button.btn.btn-default(ng-click="hello('paren in str')" ng-disabled="!foobar") Click Me!
+        vue-component-demo(
           // In face, Jade / Pug doesn't allow comment in element's attr list.
           x= 22.82
           y= 4+5 +.5 + 'px'
@@ -33,8 +35,10 @@ html(lang="en", class = ['classOne', 'classTwo'].join(','))
           @click="hello"
           placement="top-right"
           dismissable)
-        button.btn.btn-default(ng-click="hello('world')" ng-disabled="foobar") Click Me!
+        div#single-quote.example test
         div#single-quote.example
+        div#single-quote.example() test
+        div#single-quote.example()
           = 'this true single quote should highlight as a string'
           = 'this one' + "and this should too"
           span= 'another' + "quote example" + "(NOTICE: This syntax highlight is sacrificed in yajade-mode due to the limitation of Emacs's syntax engine)"

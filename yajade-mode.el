@@ -142,29 +142,60 @@
         (,yajade-mixin-re 0 font-lock-constant-face)
         ("^ *mixin" 0 font-lock-keyword-face t)
         ("^ *mixin +\\([A-z_-][A-z0-9_-]*\\)" 1 font-lock-constant-face t)
-        ("disabled" 0 font-lock-warning-face)
+        ;; ("disabled" 0 font-lock-warning-face)
         ("\\(?:false\\|null\\|true\\|undefined\\)" 0 font-lock-constant-face)
         ("[-+]?\\(?:[0-9]+[.][0-9]+\\|[.]?[0-9]+\\)" 0 font-lock-constant-face)
         ("^ *\\([=-]\\)" 0 font-lock-preprocessor-face)
         ("#{.+?}" 0 font-lock-preprocessor-face)
         ("^ *\\(|.+\\)" 1 font-lock-string-face t) ;  plain text (start with /^ *\|/)
         ("^ *[-]//\\(.+\\)" 1 font-lock-comment-face t)
-        ("^!!!\\|doctype[ ]?.*" 0 font-lock-comment-face t)))
+        ("^!!!\\|doctype[ ]?.*" 0 font-lock-comment-face t)
+        (yajade--font-lock-remove-highlights-in-plain-text 1 nil t)
+        ))
 
-(defun yajade-highlight-js-in-parens (limit)
-  "Search for a tag declaration (up to LIMIT) which contains a paren
-block, then highlight the region between the parentheses as
-javascript."
-  (when (re-search-forward (concat "^[ \t]*" yajade-tag-declaration-char-re "+" "(") limit t)
-    (forward-char -1)
-    (let ((start (point))
-          (end (progn
-                   (forward-sexp)
-                   (1- (point)))))
-          (yajade-fontify-region-as-js start end))
 
-      ;; return some empty match data to appease the font-lock gods
-      (looking-at "\\(\\)")))
+
+(defun b () (interactive) (back-to-indentation))
+
+(defun yajade--font-lock-remove-highlights-in-plain-text (limit)
+  ;; See https://www.gnu.org/software/emacs/manual/html_node/elisp/Search_002dbased-Fontification.html
+  ;; all following (looking-at "\\(\\)") is to return some empty match data to appease the font-lock gods
+  "<ex>
+  tag-name.class-name(attr='attrValue') plain text
+"
+  (if (null (re-search-forward "^\\(\\)" limit :no-error))  ; if cannot goto next line. limit is important! so don't just forward-line
+      nil  ; nil =====>  stop font-lock loop
+    (progn
+      (let* ((elem (substring-no-properties (thing-at-point 'line t) (current-indentation) -1))
+             (elem-from (progn (back-to-indentation) (point))) ; always goto indentation of this line
+             (elem-to   (progn (end-of-line) (point))))
+        (back-to-indentation)
+        (if (or (> (car (syntax-ppss)) 0) ; if in a parentheses
+                (eq ?= (char-after))  ;if the first char is any of following
+                (eq ?/ (char-after))
+                (eq ?- (char-after))
+                (eq ?| (char-after))
+                (eq ?\n (char-after))
+                (eq 32 (char-after)))
+            (progn (looking-at "\\(\\)") t)  ; t =======> continue font-lock loop
+          (progn
+            (while (if (and (not (eolp))
+                            (not (eq ?\( (char-after)))
+                            (or (and (not (eq 32 (char-after))) (not (eq ?:  (char-before))))  ; a: span()
+                                (and (not (eq 32 (char-after))) (not (eq ?\( (char-after)))))) ; not space && not (
+                       (progn (right-char) t)  ; continue while
+                     nil))  ; stop while
+            (if (eolp)
+                (progn (looking-at "\\(\\)") t) ; t ========> continue font-lock loop
+              (progn
+                (when (eq ?\( (char-after))  ; point at a paren's beginning
+                  (forward-sexp)
+                  (setq elem-to (save-excursion (end-of-line) (point))))
+                (message "%s" (thing-at-point 'line))
+                (re-search-forward "\\(.+\\)\n" elem-to :no-error)
+                t)  ; t ========> continue font-lock loop
+              )))))))
+
 
 (defun yajade-highlight-js-after-tag (limit)
   "Search for a valid js block, then highlight its contents with js-mode syntax highlighting"
