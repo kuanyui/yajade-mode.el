@@ -114,48 +114,48 @@
        "include" "yield" "mixin") 'words))
   "Yajade keywords.")
 
-(setq yajade-tag-re "^ *\\([A-z][A-z0-9-_:]*\\)[( .#\n]")  ;; [TODO] a: span()
-"Regexp used to match a basic html tag, e.g. link, a, div"
+(defvar yajade-tag-re "^ *\\([A-z][A-z0-9-_:]*\\)[( .#\n]")  ;; [TODO] a: span()
+(defvar yajade-id-re "^ *\\(?:[A-z0-9._:-]*\\)?\\(#[a-zA-Z_-][0-9a-zA-Z_-]*\\)")
+(defvar yajade-class-re "^ *\\(?:[#A-z0-9_-]*\\)?\\([.][a-zA-Z][0-9a-zA-Z_.-]*\\)")
+(defvar yajade-mixin-re "^ *[+][a-zA-Z][0-9a-zA-Z_-]*")
+(defvar yajade-tag-declaration-char-re "[-a-zA-Z0-9_.#+]")
+(defvar yajade-attr-re "\\([A-z_:.@-][A-z0-9_:.@-]*\\) *?= *?['\".0-9-A-z(]")
 
-(setq yajade-id-re "^ *\\(?:[A-z0-9._:-]*\\)?\\(#[a-zA-Z_-][0-9a-zA-Z_-]*\\)")
-"Regexp used to match an ID literal, e.g. #id, #id-one_23"
+(defvar yajade-font-lock-keywords
+  `(
+    (,yajade-attr-re 1 font-lock-variable-name-face) ; order is significant. Don't move it unless you've tested it.
+    ;; (yajade--font-lock-attr 1 font-lock-variable-name-face)
+    ("<.+?>" . font-lock-function-name-face)
+    (,yajade-tag-re 1 font-lock-function-name-face)
+    (,yajade-keywords 0 font-lock-keyword-face)
+    (,yajade-class-re 1 font-lock-type-face t)
+    (,yajade-id-re 1 font-lock-keyword-face t)
+    (,yajade-mixin-re 0 font-lock-constant-face)
+    ("^ *mixin" 0 font-lock-keyword-face t)
+    ("^ *mixin +\\([A-z_-][A-z0-9_-]*\\)" 1 font-lock-constant-face t)
+    ;; ("disabled" 0 font-lock-warning-face)
+    ("\\(?:false\\|null\\|true\\|undefined\\)" 0 font-lock-constant-face)
+    ("[-+]?\\(?:[0-9]+[.][0-9]+\\|[.]?[0-9]+\\)" 0 font-lock-constant-face)
+    ("^ *\\([=-]\\)" 0 font-lock-preprocessor-face)
+    ("^ *\\(|.+\\)" 1 font-lock-string-face t) ;  plain text (start with /^ *\|/)
+    ("^ *[-]//\\(.+\\)" 1 font-lock-comment-face t)
+    ("^!!!\\|doctype[ ]?.*" 0 font-lock-comment-face t)
+    (yajade--font-lock-remove-highlights-in-plain-text 1 nil t)
+    ("#{.+?}" 0 font-lock-preprocessor-face t)
+    ))
 
-(setq yajade-class-re "^ *\\(?:[#A-z0-9_-]*\\)?\\([.][a-zA-Z][0-9a-zA-Z_.-]*\\)")
-"Regexp used to match a class literal, e.g. .class, .class_name-123"
-
-(setq yajade-mixin-re "^ *[+][a-zA-Z][0-9a-zA-Z_-]*")
-"Regexp used to match a mixin name"
-
-(setq yajade-tag-declaration-char-re "[-a-zA-Z0-9_.#+]")
-"Regexp used to match a character in a tag declaration"
-
-(setq yajade-attr-re "\\([A-z_:.@-][A-z0-9_:.@-]*\\) *?= *?['\".0-9-A-z(]")
-
-(setq yajade-font-lock-keywords
-      `(
-        ("<.+?>" . font-lock-function-name-face)
-        (,yajade-attr-re 1 font-lock-variable-name-face)
-        (,yajade-tag-re 1 font-lock-function-name-face)
-        (,yajade-keywords 0 font-lock-keyword-face)
-        (,yajade-class-re 1 font-lock-type-face t)
-        (,yajade-id-re 1 font-lock-keyword-face t)
-        (,yajade-mixin-re 0 font-lock-constant-face)
-        ("^ *mixin" 0 font-lock-keyword-face t)
-        ("^ *mixin +\\([A-z_-][A-z0-9_-]*\\)" 1 font-lock-constant-face t)
-        ;; ("disabled" 0 font-lock-warning-face)
-        ("\\(?:false\\|null\\|true\\|undefined\\)" 0 font-lock-constant-face)
-        ("[-+]?\\(?:[0-9]+[.][0-9]+\\|[.]?[0-9]+\\)" 0 font-lock-constant-face)
-        ("^ *\\([=-]\\)" 0 font-lock-preprocessor-face)
-        ("^ *\\(|.+\\)" 1 font-lock-string-face t) ;  plain text (start with /^ *\|/)
-        ("^ *[-]//\\(.+\\)" 1 font-lock-comment-face t)
-        ("^!!!\\|doctype[ ]?.*" 0 font-lock-comment-face t)
-        (yajade--font-lock-remove-highlights-in-plain-text 1 nil t)
-        ("#{.+?}" 0 font-lock-preprocessor-face t)
-        ))
-
-
-
-(defun b () (interactive) (back-to-indentation))
+(defun yajade--font-lock-attr (limit)
+  ;; See https://www.gnu.org/software/emacs/manual/html_node/elisp/Search_002dbased-Fontification.html
+  ;; all following (`looking-at' "\\(\\)") is to return some empty match data to appease the font-lock gods
+  "The behavior of font-lock callback is ridiculously shitty. Reserve this shit function as memories."
+  (if (not (re-search-forward yajade-attr-re limit :no-error))
+      nil  ; nil =====>  stop font-lock loop
+    (let ((in-string (nth 3 (syntax-ppss)))
+          (in-paren-depth  (nth 0 (syntax-ppss))))
+      (if (or in-string
+              (not (eq 1 in-paren-depth)))
+          (looking-at "\\(\\)"))
+      t))) ; continue next font-lock loop
 
 (defun yajade--font-lock-remove-highlights-in-plain-text (limit)
   ;; See https://www.gnu.org/software/emacs/manual/html_node/elisp/Search_002dbased-Fontification.html
@@ -197,7 +197,6 @@
                 t)  ; t ========> continue font-lock loop
               )))))))
 
-(re-search-forward "\\(.*\\)$" nil :no-error) ;; fff
 
 (defun yajade-highlight-js-after-tag (limit)
   "Search for a valid js block, then highlight its contents with js-mode syntax highlighting"

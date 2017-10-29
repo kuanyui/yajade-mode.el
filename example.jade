@@ -23,7 +23,6 @@ html(lang="en", class = ['classOne', 'classTwo'].join(','))  // this should be i
           p Get on it! #{foobar}
           form
             input(type = "text", name='user[name]', readonly = true, disabled, wtf='a' stroke='a')
-
         button.btn.btn-default(ng-click="hello('paren in str')" ng-disabled="!foobar") Click Me! #{foobar}
         button#hello.btn.btn-default(ng-click="hello('in str')")
         vue-component-demo(
