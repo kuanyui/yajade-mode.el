@@ -180,22 +180,25 @@
             (progn (looking-at "\\(\\)") t)  ; t =======> continue font-lock loop
           (progn
             (while (if (and (not (eolp))
+                            (not (eq ?= (char-after)))
                             (not (eq ?\( (char-after)))
                             (or (and (not (eq 32 (char-after))) (not (eq ?:  (char-before))))  ; a: span()
                                 (and (not (eq 32 (char-after))) (not (eq ?\( (char-after)))))) ; not space && not (
                        (progn (right-char) t)  ; continue while
                      nil))  ; stop while
-            (if (eolp)
+            (if (or (eolp)
+                    (eq ?= (char-after)))
                 (progn (looking-at "\\(\\)") t) ; t ========> continue font-lock loop
               (progn
                 (when (eq ?\( (char-after))  ; point at a paren's beginning
                   (forward-sexp)
                   (setq elem-to (save-excursion (end-of-line) (point))))
+                (re-search-forward "\\(.*\\)$" elem-to :no-error)
                 (message "%s" (thing-at-point 'line))
-                (re-search-forward "\\(.+\\)\n" elem-to :no-error)
                 t)  ; t ========> continue font-lock loop
               )))))))
 
+(re-search-forward "\\(.*\\)$" nil :no-error) ;; fff
 
 (defun yajade-highlight-js-after-tag (limit)
   "Search for a valid js block, then highlight its contents with js-mode syntax highlighting"
