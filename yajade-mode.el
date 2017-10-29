@@ -115,7 +115,11 @@
   "Yajade keywords.")
 
 (defvar yajade-tag-re "^ *\\([A-z][A-z0-9-_:]*\\)[( .#\n]")
-(defvar yajade-nested-tag-re "^ *\\(?:[A-z][A-z0-9-]*\\): *\\([A-z][A-z0-9-_:]*\\)*?(") ;  a: span()  [TODO] unused. I think this should not be done with pure regexp.
+
+;;[TODO] unused. I think this should not be done with pure regexp.
+;; However I have no interest to solve this currently because font-lock's API is so shitty.
+(defvar yajade-nested-tag-re "^ *\\(?:[A-z][A-z0-9-]*\\): *\\([A-z][A-z0-9-_:]*\\)*?(") ;  a: span()
+
 (defvar yajade-id-re "^ *\\(?:[A-z0-9._:-]*\\)?\\(#[a-zA-Z_-][0-9a-zA-Z_-]*\\)")
 (defvar yajade-class-re "^ *\\(?:[#A-z0-9_-]*\\)?\\([.][a-zA-Z][0-9a-zA-Z_.-]*\\)")
 (defvar yajade-mixin-re "^ *[+][a-zA-Z][0-9a-zA-Z_-]*")
