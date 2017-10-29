@@ -182,7 +182,7 @@
             (while (if (and (not (eolp))
                             (not (eq ?= (char-after)))
                             (not (eq ?\( (char-after)))
-                            (or (and (not (eq 32 (char-after))) (not (eq ?:  (char-before))))  ; a: span()
+                            (or (and (eq 32 (char-after)) (eq ?: (char-before)))  ; a: span()
                                 (and (not (eq 32 (char-after))) (not (eq ?\( (char-after)))))) ; not space && not (
                        (progn (right-char) t)  ; continue while
                      nil))  ; stop while
