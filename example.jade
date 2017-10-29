@@ -35,10 +35,15 @@ html(lang="en", class = ['classOne', 'classTwo'].join(','))  // this should be i
           @click="hello"
           placement="top-right"
           dismissable)
+        for menu in menus
+          li.side__menu__single.clearfix
+
         div#single-quote.example test
         div#single-quote.example
         div#single-quote.example() test
         div#single-quote.example()
+        div#single-quote.example(ng-show="hello()") the quick brown firefox jumps over a lazy safari
+        div#single-quote.example(ng-show="hello()")
           = 'this true single quote should highlight as a string'
           = 'this one' + "and this should too"
           span= 'another' + "quote example" + "(NOTICE: This syntax highlight is sacrificed in yajade-mode due to the limitation of Emacs's syntax engine)"
