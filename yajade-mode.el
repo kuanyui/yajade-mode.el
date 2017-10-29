@@ -92,8 +92,8 @@
       (let ((table (make-syntax-table)))
         (modify-syntax-entry ?\" "\"" table)
         (modify-syntax-entry ?\' "\"" table)
-        (modify-syntax-entry ?_ "w" table)    ; _    is part of a symbol
-        (modify-syntax-entry ?- "w" table)    ; -    is part of a symbol
+        (modify-syntax-entry ?_ "_" table)    ; _    is part of a symbol
+        (modify-syntax-entry ?- "_" table)    ; -    is part of a symbol
         ;;;;(modify-syntax-entry ?/ "< 12" table) ; //   is begin of comment
         (modify-syntax-entry ?/ ". 12" table) ; //   is begin of comment
         (modify-syntax-entry ?\n "> " table)   ; \n   is end of comment
@@ -117,7 +117,7 @@
 (setq yajade-tag-re "^ *\\([A-z][A-z0-9-_:]*\\)[( .#\n]")  ;; [TODO] a: span()
 "Regexp used to match a basic html tag, e.g. link, a, div"
 
-(setq yajade-id-re "^ *\\(?:[.A-z0-9_-]*\\)?\\(#[a-zA-Z][0-9a-zA-Z_-]*\\)")
+(setq yajade-id-re "^ *\\(?:[A-z0-9._:-]*\\)?\\(#[a-zA-Z_-][0-9a-zA-Z_-]*\\)")
 "Regexp used to match an ID literal, e.g. #id, #id-one_23"
 
 (setq yajade-class-re "^ *\\(?:[#A-z0-9_-]*\\)?\\([.][a-zA-Z][0-9a-zA-Z_.-]*\\)")
@@ -137,7 +137,7 @@
         (,yajade-attr-re 1 font-lock-variable-name-face)
         (,yajade-tag-re 1 font-lock-function-name-face)
         (,yajade-keywords 0 font-lock-keyword-face)
-        (,yajade-class-re 1 font-lock-type-face)
+        (,yajade-class-re 1 font-lock-type-face t)
         (,yajade-id-re 1 font-lock-keyword-face t)
         (,yajade-mixin-re 0 font-lock-constant-face)
         ("^ *mixin" 0 font-lock-keyword-face t)
@@ -146,11 +146,11 @@
         ("\\(?:false\\|null\\|true\\|undefined\\)" 0 font-lock-constant-face)
         ("[-+]?\\(?:[0-9]+[.][0-9]+\\|[.]?[0-9]+\\)" 0 font-lock-constant-face)
         ("^ *\\([=-]\\)" 0 font-lock-preprocessor-face)
-        ("#{.+?}" 0 font-lock-preprocessor-face)
         ("^ *\\(|.+\\)" 1 font-lock-string-face t) ;  plain text (start with /^ *\|/)
         ("^ *[-]//\\(.+\\)" 1 font-lock-comment-face t)
         ("^!!!\\|doctype[ ]?.*" 0 font-lock-comment-face t)
         (yajade--font-lock-remove-highlights-in-plain-text 1 nil t)
+        ("#{.+?}" 0 font-lock-preprocessor-face t)
         ))
 
 
@@ -194,7 +194,6 @@
                   (forward-sexp)
                   (setq elem-to (save-excursion (end-of-line) (point))))
                 (re-search-forward "\\(.*\\)$" elem-to :no-error)
-                (message "%s" (thing-at-point 'line))
                 t)  ; t ========> continue font-lock loop
               )))))))
 
