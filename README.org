@@ -1,0 +1,19 @@
+* yajade-mode
+
+=yajade-mode= is yet another major-mode for [[http://jadelang.net/][Jade]] / [[http://jadelang.net/][Pug]] template language.
+
+** Compare to =pug-mode= & =jade-mode=
+- Better (or less-wrong) syntax-highlights than =pug-mode= and =jade-mode=. (see screenshot)
+- Compatible with [[https://github.com/purcell/mmm-mode][mmm-mode]]
+- No inline JS / CSS highlight (please use =mmm-mode= to achive this)
+
+** Screenshot
+
+** Known Bugs
+- Emacs's syntax engine cannot deal with single-line string, it's uncustomizable and always match paired quotes across lines (doc: [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Syntax-Class-Table.html#Syntax-Class-Table][1]], [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Syntax-Flags.html#Syntax-Flags][2]]), so quote character in plain-text (e.g. =span() foo's bar=) will still be wrongly interpretered.
+#+BEGIN_QUOTE
+It's impossible to fix currently unless GNU Emacs improves its syntax APIs, or write a real parser to replace the rules for string quotes in syntax-class-table.
+#+END_QUOTE
+
+- [[http://jadelang.net/reference/code/][Buffered code]] is wrongly highlighted. I've ever tried to solve this with =yajade--font-lock-attr= function, but font-lock act more bizarre than JoJo's Bizarre Adventure.
+- Multi-line string block is not handled.
