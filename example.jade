@@ -24,7 +24,8 @@ html(lang="en", class = ['classOne', 'classTwo'].join(','))  // this should be i
           form
             input(type = "text", name='user[name]', readonly = true, disabled, wtf='a' stroke='a')
 
-        button.btn.btn-default(ng-click="hello('paren in str')" ng-disabled="!foobar") Click Me!
+        button.btn.btn-default(ng-click="hello('paren in str')" ng-disabled="!foobar") Click Me! #{foobar}
+        button#hello.btn.btn-default(ng-click="hello('in str')")
         vue-component-demo(
           // In face, Jade / Pug doesn't allow comment in element's attr list.
           x= 22.82
@@ -35,11 +36,12 @@ html(lang="en", class = ['classOne', 'classTwo'].join(','))  // this should be i
           @click="hello"
           placement="top-right"
           dismissable)
-        for menu in menus
-          li.side__menu__single.clearfix
+        - for menu in menus
+          li.side__menu-single.clearfix#id-hello
 
         div#single-quote.example test
         div#single-quote.example
+        div#single-quote.example() test
         div#single-quote.example() test
         div#single-quote.example()
         div#single-quote.example(ng-show="hello()") the quick brown firefox jumps over a lazy safari
@@ -56,6 +58,7 @@ html(lang="en", class = ['classOne', 'classTwo'].join(','))  // this should be i
         //- +mixIn('do not highlight mixins in comment blocks')
         //- quote' quote" in comment
         div.examples#javascript
+          //- JS / CSS please see mmm-mode. yajade-mode won't deal with it.
           - var a = 1;
           - var helperFunction = function (a) { return (a === 1 ? 'singular' : 'plural'); };
           span= someArray.join(', ')
@@ -63,6 +66,13 @@ html(lang="en", class = ['classOne', 'classTwo'].join(','))  // this should be i
           span#id.class(style = 'margin-bottom: 0;')= "some_js_expression".split('_').join(' ')
       #footer
         #copywrite-text= locals
+script
+ :babel
+  var app;
+  app = angular.module('webui');
+  app.controllerProvider.register('webuiHelloControl', function($scope) {
+    $scope.d = { basic: {}, option66: {}, option82: [], portBased: [], macBased: []};
+  })
 
 
 
