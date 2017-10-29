@@ -114,7 +114,7 @@
        "include" "yield" "mixin") 'words))
   "Yajade keywords.")
 
-(setq yajade-tag-re "^ *\\([A-z][A-z0-9-_]*\\)[( .#\n]")  ; [TODO] tag1: tag2(...)
+(setq yajade-tag-re "^ *\\([A-z][A-z0-9-_:]*\\)[( .#\n]")  ;; [TODO] a: span()
 "Regexp used to match a basic html tag, e.g. link, a, div"
 
 (setq yajade-id-re "^ *\\(?:[.A-z0-9_-]*\\)?\\(#[a-zA-Z][0-9a-zA-Z_-]*\\)")
@@ -126,33 +126,29 @@
 (setq yajade-mixin-re "^ *[+][a-zA-Z][0-9a-zA-Z_-]*")
 "Regexp used to match a mixin name"
 
-(setq yajade-double-quote-string-re "[\"]\\(\\\\.\\|[^\"\n]\\)*[\"]")
-"Regexp used to match a double-quoted string literal"
-
-(setq yajade-single-quote-string-re "[']\\(\\\\.\\|[^'\n]\\)*[']")
-"Regexp used to match a single-quoted string literal"
-
 (setq yajade-tag-declaration-char-re "[-a-zA-Z0-9_.#+]")
 "Regexp used to match a character in a tag declaration"
 
-(setq yajade-attr-re "\\([A-z_:.@-][A-z0-9_:.@-]*\\) *?=")
+(setq yajade-attr-re "\\([A-z_:.@-][A-z0-9_:.@-]*\\) *?= *?['\".0-9-A-z(]")
 
 (setq yajade-font-lock-keywords
       `(
         ("<.+?>" . font-lock-function-name-face)
-        (,yajade-tag-re 1 font-lock-function-name-face)
-        (,yajade-keywords . font-lock-keyword-face)
-        (,yajade-id-re 1 font-lock-keyword-face)
-        (,yajade-class-re 1 font-lock-type-face)
         (,yajade-attr-re 1 font-lock-variable-name-face)
+        (,yajade-tag-re 1 font-lock-function-name-face)
+        (,yajade-keywords 0 font-lock-keyword-face)
+        (,yajade-class-re 1 font-lock-type-face)
+        (,yajade-id-re 1 font-lock-keyword-face t)
         (,yajade-mixin-re 0 font-lock-constant-face)
+        ("^ *mixin" 0 font-lock-keyword-face t)
+        ("^ *mixin +\\([A-z_-][A-z0-9_-]*\\)" 1 font-lock-constant-face t)
         ("disabled" 0 font-lock-warning-face)
         ("\\(?:false\\|null\\|true\\|undefined\\)" 0 font-lock-constant-face)
         ("[-+]?\\(?:[0-9]+[.][0-9]+\\|[.]?[0-9]+\\)" 0 font-lock-constant-face)
         ("^ *\\([=-]\\)" 0 font-lock-preprocessor-face)
         ("#{.+?}" 0 font-lock-preprocessor-face)
         ("^ *\\(|.+\\)" 1 font-lock-string-face t) ;  plain text (start with /^ *\|/)
-        ("^ *[#.A-z0-9_-]+(.*)\\(.+\\)" 1 nil t)  ; plain text
+        ("^ *[-]//\\(.+\\)" 1 font-lock-comment-face t)
         ("^!!!\\|doctype[ ]?.*" 0 font-lock-comment-face t)))
 
 (defun yajade-highlight-js-in-parens (limit)
