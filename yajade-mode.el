@@ -114,7 +114,8 @@
        "include" "yield" "mixin") 'words))
   "Yajade keywords.")
 
-(defvar yajade-tag-re "^ *\\([A-z][A-z0-9-_:]*\\)[( .#\n]")  ;; [TODO] a: span()
+(defvar yajade-tag-re "^ *\\([A-z][A-z0-9-_:]*\\)[( .#\n]")
+(defvar yajade-nested-tag-re "^ *\\(?:[A-z][A-z0-9-]*\\): *\\([A-z][A-z0-9-_:]*\\)*?(") ;  a: span()  [TODO] unused. I think this should not be done with pure regexp.
 (defvar yajade-id-re "^ *\\(?:[A-z0-9._:-]*\\)?\\(#[a-zA-Z_-][0-9a-zA-Z_-]*\\)")
 (defvar yajade-class-re "^ *\\(?:[#A-z0-9_-]*\\)?\\([.][a-zA-Z][0-9a-zA-Z_.-]*\\)")
 (defvar yajade-mixin-re "^ *[+][a-zA-Z][0-9a-zA-Z_-]*")
@@ -127,6 +128,7 @@
     ;; (yajade--font-lock-attr 1 font-lock-variable-name-face)
     ("<.+?>" . font-lock-function-name-face)
     (,yajade-tag-re 1 font-lock-function-name-face)
+    (,yajade-double-tag-re 1 font-lock-function-name-face)
     (,yajade-keywords 0 font-lock-keyword-face)
     (,yajade-class-re 1 font-lock-type-face t)
     (,yajade-id-re 1 font-lock-keyword-face t)
@@ -197,26 +199,6 @@
                 t)  ; t ========> continue font-lock loop
               )))))))
 
-
-(defun yajade-highlight-js-after-tag (limit)
-  "Search for a valid js block, then highlight its contents with js-mode syntax highlighting"
-  (when (re-search-forward "^[ \t]*" limit t)
-    (when (not (eolp))
-
-      ;; before parsing/skipping ahead, check the first char; if it's
-      ;; - (not a comment starter!) or =, then we know it's a JS block
-      (if (or (looking-at "-[^/]") (looking-at "="))
-          (yajade-fontify-region-as-js (point) (point-at-eol))
-
-        ;; no luck with the first char, so parse to the end of the tag
-        ;; (including optional paren block) and check for '='
-        (yajade-goto-end-of-tag)
-        (if (and (looking-at "=") (not (eolp)))
-            (yajade-fontify-region-as-js (point) (point-at-eol)))))
-
-    ;; return some empty match data to appease the font-lock gods
-    (looking-at "\\(\\)")))
-
 (defun yajade-goto-end-of-tag ()
   "Skip ahead over whitespace, tag characters (defined in
 `yajade-tag-declaration-char-re'), and paren blocks (using
@@ -224,7 +206,6 @@
 before its content). Use when point is inside or to the left of a tag
 declaration"
   (interactive)
-
   ;; skip indentation characters
   (while (looking-at "[ \t]")
     (forward-char 1))
@@ -233,11 +214,6 @@ declaration"
     (forward-char 1))
   (if (looking-at "(")
       (forward-sexp 1)))
-
-
-
-
-
 
 (defun yajade-region-for-sexp ()
   "Selects the current sexp as the region"
