@@ -133,7 +133,6 @@
     ("<.+?>" . font-lock-function-name-face)
     (,yajade-keywords 0 font-lock-keyword-face)
     (,yajade-tag-re 1 font-lock-function-name-face)
-    (,yajade-double-tag-re 1 font-lock-function-name-face)
     (,yajade-class-re 1 font-lock-type-face t)
     (,yajade-id-re 1 font-lock-keyword-face t)
     (,yajade-mixin-re 0 font-lock-constant-face)
