@@ -37,7 +37,7 @@ html(lang="en", class = ['classOne', 'classTwo'].join(','))  // this should be i
         - for menu in menus
           li.side__menu-single.clearfix#id-hello
 
-        div#single-quote.example test
+        div#single-quote.example .test
         div#single-quote.example
         div#single-quote.example() test
         div#single-quote.example()
@@ -54,7 +54,7 @@ html(lang="en", class = ['classOne', 'classTwo'].join(','))  // this should be i
           | Hello!
         +helpMe("if this is .bolded #that's bad, we want a string","a second arg or else");
         //- +mixIn('do not highlight mixins in comment blocks')
-        //- quote' quote" in comment
+        //- quote' quote" in comment"
         div.examples#javascript
           //- JS / CSS please see mmm-mode. yajade-mode won't deal with it.
           - var a = 1;
@@ -65,7 +65,7 @@ html(lang="en", class = ['classOne', 'classTwo'].join(','))  // this should be i
       #footer
         #copywrite-text= locals
         // I've no interests to solve following 4 lines because font-lock's API is so shitty.
-        span: a.btn(a=1 b="b") this is so complexed to solve in // Emacs
+        span: a.btn(a=1 b="b") .btn this is so complexed to solve in // Emacs
         span: a.btn: span(a=1 b="b") this is so complexed to solve in // Emacs
         span: span: span: span(a=1 b="b") this is so complexed to solve in // Emacs
         span(): span(a=1 b="b") Yajade not support syntax-highlight for this

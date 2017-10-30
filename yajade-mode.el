@@ -128,24 +128,24 @@
 
 (defvar yajade-font-lock-keywords
   `(
+    (,yajade-keywords 0 font-lock-keyword-face)
     (,yajade-attr-re 1 font-lock-variable-name-face) ; order is significant. Don't move it unless you've tested it.
     ;; (yajade--font-lock-attr 1 font-lock-variable-name-face)
     ("<.+?>" . font-lock-function-name-face)
-    (,yajade-keywords 0 font-lock-keyword-face)
     (,yajade-tag-re 1 font-lock-function-name-face)
     (,yajade-class-re 1 font-lock-type-face t)
     (,yajade-id-re 1 font-lock-keyword-face t)
     (,yajade-mixin-re 0 font-lock-constant-face)
     ("^ *mixin" 0 font-lock-keyword-face t)
     ("^ *mixin +\\([A-z_-][A-z0-9_-]*\\)" 1 font-lock-constant-face t)
-    ;; ("disabled" 0 font-lock-warning-face)
+    ("disabled" 0 font-lock-warning-face)
     ("\\(?:false\\|null\\|true\\|undefined\\)" 0 font-lock-constant-face)
     ("[-+]?\\(?:[0-9]+[.][0-9]+\\|[.]?[0-9]+\\)" 0 font-lock-constant-face)
     ("^ *\\([=-]\\)" 0 font-lock-preprocessor-face)
     ("^ *\\(|.+\\)" 1 font-lock-string-face t) ;  plain text (start with /^ *\|/)
     ("^ *[-]//\\(.+\\)" 1 font-lock-comment-face t)
     ("^!!!\\|doctype[ ]?.*" 0 font-lock-comment-face t)
-    (yajade--font-lock-remove-highlights-in-plain-text 1 nil t)
+    ;;(yajade--font-lock-remove-highlights-in-plain-text 1 nil t)  ;; this will cause mmm-mode error. Fuck.
     ("#{.+?}" 0 font-lock-preprocessor-face t)
     ))
 
@@ -168,7 +168,9 @@
   "<ex>
   tag-name.class-name(attr='attrValue') plain text
 "
-  (if (null (re-search-forward "^\\(\\)" limit :no-error))  ; if cannot goto next line. limit is important! so don't just forward-line
+  (interactive)
+  (if (or (eobp)
+          (null (re-search-forward "^\\(\\)" limit :no-error)))  ; if cannot goto next line. limit is important! so don't just forward-line
       nil  ; nil =====>  stop font-lock loop
     (progn
       (let* ((elem (substring-no-properties (thing-at-point 'line t) (current-indentation) -1))
