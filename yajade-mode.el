@@ -39,7 +39,7 @@
 
 (require 'js)
 
-(defvar yajade-tab-width)
+(defvar yajade-tab-width 2)
 
 (defun yajade-debug (string &rest args)
   "Prints a debug message"
@@ -126,28 +126,28 @@
 (defvar yajade-tag-declaration-char-re "[-a-zA-Z0-9_.#+]")
 (defvar yajade-attr-re "\\([A-z_:.@-][A-z0-9_:.@-]*\\) *?= *?['\".0-9-A-z(]")
 
-(defvar yajade-font-lock-keywords
-  `(
-    (,yajade-keywords 0 font-lock-keyword-face)
-    (,yajade-attr-re 1 font-lock-variable-name-face) ; order is significant. Don't move it unless you've tested it.
-    ;; (yajade--font-lock-attr 1 font-lock-variable-name-face)
-    ("<.+?>" . font-lock-function-name-face)
-    (,yajade-tag-re 1 font-lock-function-name-face)
-    (,yajade-class-re 1 font-lock-type-face t)
-    (,yajade-id-re 1 font-lock-keyword-face t)
-    (,yajade-mixin-re 0 font-lock-constant-face)
-    ("^ *mixin" 0 font-lock-keyword-face t)
-    ("^ *mixin +\\([A-z_-][A-z0-9_-]*\\)" 1 font-lock-constant-face t)
-    ("disabled" 0 font-lock-warning-face)
-    ("\\(?:false\\|null\\|true\\|undefined\\)" 0 font-lock-constant-face)
-    ("[-+]?\\(?:[0-9]+[.][0-9]+\\|[.]?[0-9]+\\)" 0 font-lock-constant-face)
-    ("^ *\\([=-]\\)" 0 font-lock-preprocessor-face)
-    ("^ *\\(|.+\\)" 1 font-lock-string-face t) ;  plain text (start with /^ *\|/)
-    ("^ *[-]//\\(.+\\)" 1 font-lock-comment-face t)
-    ("^!!!\\|doctype[ ]?.*" 0 font-lock-comment-face t)
-    ;;(yajade--font-lock-remove-highlights-in-plain-text 1 nil t)  ;; this will cause mmm-mode error. Fuck.
-    ("#{.+?}" 0 font-lock-preprocessor-face t)
-    ))
+(setq yajade-font-lock-keywords
+      `(
+        (,yajade-keywords 0 font-lock-keyword-face)
+        (,yajade-attr-re 1 font-lock-variable-name-face) ; order is significant. Don't move it unless you've tested it.
+        ;; (yajade--font-lock-attr 1 font-lock-variable-name-face)
+        ("<.+?>" . font-lock-function-name-face)
+        (,yajade-tag-re 1 font-lock-function-name-face)
+        (,yajade-class-re 1 font-lock-type-face t)
+        (,yajade-id-re 1 font-lock-keyword-face t)
+        (,yajade-mixin-re 0 font-lock-constant-face)
+        ("^ *mixin" 0 font-lock-keyword-face t)
+        ("^ *mixin +\\([A-z_-][A-z0-9_-]*\\)" 1 font-lock-constant-face t)
+        ("disabled" 0 font-lock-warning-face)
+        ("\\(?:false\\|null\\|true\\|undefined\\)" 0 font-lock-constant-face)
+        ("[-+]?\\(?:[0-9]+[.][0-9]+\\|[.]?[0-9]+\\)" 0 font-lock-constant-face)
+        ("^ *\\([=-]\\)" 0 font-lock-preprocessor-face)
+        ("^ *\\(|.+\\)" 1 font-lock-string-face t) ;  plain text (start with /^ *\|/)
+        ("^ *[-]//\\(.+\\)" 1 font-lock-comment-face t)
+        ("^!!!\\|doctype[ ]?.*" 0 font-lock-comment-face t)
+        ;;(yajade--font-lock-remove-highlights-in-plain-text 1 nil t)  ;; this will cause mmm-mode error. Fuck.
+        ("#{.+?}" 0 font-lock-preprocessor-face t)
+        ))
 
 (defun yajade--font-lock-attr (limit)
   ;; See https://www.gnu.org/software/emacs/manual/html_node/elisp/Search_002dbased-Fontification.html
