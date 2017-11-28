@@ -129,7 +129,7 @@
 (setq yajade-font-lock-keywords
       `(
         (,yajade-keywords 0 font-lock-keyword-face)
-        (,yajade-attr-re 1 font-lock-variable-name-face) ; order is significant. Don't move it unless you've tested it.
+        (,yajade-attr-re 1 font-lock-variable-name-face t) ; order is significant. Don't move it unless you've tested it.
         ;; (yajade--font-lock-attr 1 font-lock-variable-name-face)
         ("<.+?>" . font-lock-function-name-face)
         (,yajade-tag-re 1 font-lock-function-name-face)
@@ -220,125 +220,51 @@ declaration"
   (if (looking-at "(")
       (forward-sexp 1)))
 
-(defun yajade-region-for-sexp ()
-  "Selects the current sexp as the region"
-  (interactive)
-  (beginning-of-line)
-  (let ((ci (current-indentation)))
-    (push-mark nil nil t)
-    (while (> (yajade-next-line-indentation) ci)
-      (forward-line)
-      (end-of-line))))
+(defun yajade-get-nearest-left-parent-parentheses-pos (&optional point)
+  "If not in parentheses, return nil"
+  (let ((pos-list (nth 9 (syntax-ppss point))))
+    (if pos-list
+        (car (last pos-list)))))
+
+(defun yajade-get-target-indentation (&optional point)
+  (save-excursion
+    (if point (goto-char point))
+    (forward-line -1)
+    (while (yajade-empty-line-p) (forward-line -1))
+    (let (stop left-paren-pos)
+      (while (not stop)
+        (back-to-indentation)
+        (setq left-paren-pos (yajade-get-nearest-left-parent-parentheses-pos))
+        (if left-paren-pos
+            (goto-char left-paren-pos)
+          (setq stop t)))
+      (current-indentation))))
+
+(defun yajade-get-max-indentation (&optional point)
+  (+ yajade-tab-width (yajade-get-target-indentation point)))
+
+(defun yajade-get-current-indentation (&optional point)
+  (save-excursion (goto-char point)
+                  (current-indentation)))
 
 (defun yajade-indent ()
-  "Indent current region or line.
-Calls `yajade-indent-region' with an active region or `yajade-indent-line'
-without."
   (interactive)
-  (if (region-active-p)
-      (yajade-indent-region
-
-       ;; use beginning of line at region-beginning
-       (save-excursion
-         (goto-char (region-beginning))
-         (line-beginning-position))
-
-       ;; use end of line at region-end
-       (save-excursion
-         (goto-char (region-end))
-         (line-end-position)))
-    (yajade-indent-line)))
-
-(defun yajade-indent-line ()
-  "Indent current line of jade code.
-If the cursor is left of the current indentation, then the first call
-will simply jump to the current indent. Subsequent calls will indent
-the current line by `yajade-tab-width' until current indentation is
-nested one tab-width deeper than its parent tag. At that point, an
-additional call will reset indentation to column 0."
-  (interactive)
-  (let ((left-of-indent (>= (current-column) (current-indentation)))
-        (indent (yajade-calculate-indent-target)))
-    (if left-of-indent
-
-        ;; if cursor is at or beyond current indent, indent normally
-        (indent-line-to indent)
-
-      ;; if cursor is trailing current indent, first indentation should
-      ;; jump to the current indentation column (subsequent calls
-      ;; will indent normally)
-      (indent-line-to (current-indentation)))))
-
-(defun yajade-indent-region (start end)
-  "Indent active region according to indentation of region's first
-line relative to its parent. Keep region active after command
-terminates (to facilitate subsequent indentations of the same region)"
-  (interactive "r")
-  (save-excursion
-
-    ;; go to start of region so we can find out its target indent
-    (goto-char start)
-
-    ;; keep region active after command
-    (let* ((deactivate-mark)
-
-           ;; find indent target for first line
-           (first-line-indent-target (yajade-calculate-indent-target))
-
-           ;; use current-indentation to turn target indent into
-           ;; a relative indent to apply to each line in region
-           (first-line-relative-indent
-            (- first-line-indent-target (current-indentation))))
-
-      ;; apply relative indent
-      (indent-rigidly start end first-line-relative-indent))))
-
-(defun yajade-calculate-indent-target ()
-  "Return the column to which the current line should be indented."
-  (let ((max-indent (+ (yajade-previous-line-indentation) yajade-tab-width)))
-    (if (>= (current-indentation) max-indent) ;; if at max indentation
-        0
-      (+ (current-indentation) yajade-tab-width))))
+  (let ((parent-parentheses-pos (yajade-get-nearest-left-parent-parentheses-pos)))
+    (if parent-parentheses-pos  ; if cursor is in a parentheses
+        (indent-line-to (save-excursion (goto-char parent-parentheses-pos)
+                                        (+ 1 (current-column))))
+      (indent-line-to (min (+ yajade-tab-width (current-indentation))
+                           (yajade-get-max-indentation))))))
 
 (defun yajade-unindent ()
   "Unindent active region or current line."
   (interactive)
-  (if (region-active-p)
-      (yajade-unindent-region
-
-       ;; use beginning of line at region-beginning
-       (save-excursion
-         (goto-char (region-beginning))
-         (line-beginning-position))
-
-       ;; use end of line at region-end
-       (save-excursion
-         (goto-char (region-end))
-         (line-end-position)))
-
-    ;; when no region is active
-    (yajade-unindent-line)))
-
-(defun yajade-unindent-line ()
-  "Unindent line under point by `yajade-tab-width'.
-Calling when `current-indentation' is 0 will have no effect."
-  (indent-line-to
-   (max
-    (- (current-indentation) yajade-tab-width)
-    0)))
-
-(defun yajade-unindent-region (start end)
-  "Unindent active region by `yajade-tab-width'.
-Follows indentation behavior of `indent-rigidly'."
-  (interactive "r")
-  (let (deactivate-mark)
-    (indent-rigidly start end (- yajade-tab-width))))
+  (indent-line-to (max 0 (- (current-indentation) yajade-tab-width))))
 
 (defun yajade-previous-line-indentation ()
   "Get the indentation of the previous (non-blank) line (from point)."
   (interactive)
   (save-excursion
-
     ;; move up to the nearest non-blank line (or buffer start)
     (while (progn ;; progn used to get do...while control flow
              (forward-line -1)
@@ -346,46 +272,11 @@ Follows indentation behavior of `indent-rigidly'."
     (let ((prev-line-indent (current-indentation)))
       prev-line-indent)))
 
-(defun yajade-next-line-indentation ()
-  "Get the indentation of the next (non-blank) line (from point)."
-  (interactive)
-  (save-excursion
-
-    ;; move down to the next non-blank line (or buffer end)
-    (while (progn ;; progn used to get do...while control flow
-             (forward-line 1)
-             (and (yajade-blank-line-p) (not (= (point-at-eol) (point-max))))))
-    (let ((next-line-indent (current-indentation)))
-      next-line-indent)))
-
 (defun yajade-newline-and-indent ()
   "Insert newline and indent to parent's indentation level."
   (interactive)
   (newline)
-  (indent-line-to (max (yajade-previous-line-indentation) 0)))
-
-(defun yajade-fontify-region-as-js (beg end)
-  "Fontify a region between BEG and END using js-mode fontification.
-Inspired by (read: stolen from) from `haml-mode'. Note the clever use
-of `narrow-to-region' by the author of `haml-mode' to keep syntactic
-highlighting (maybe other things too?) from looking beyond the
-region defined by BEG and END."
-  (save-excursion
-    (save-match-data
-      (let ((font-lock-keywords js--font-lock-keywords-3)
-            (font-lock-syntax-table js-mode-syntax-table)
-            (font-lock-syntactic-keywords nil)
-            (syntax-propertize-function nil)
-            (font-lock-multiline 'undecided)
-            (font-lock-dont-widen t)
-            font-lock-keywords-only
-            font-lock-extend-region-functions
-            font-lock-keywords-case-fold-search)
-        (when (and (fboundp 'js--update-quick-match-re) (null js--quick-match-re-func))
-          (js--update-quick-match-re))
-        (save-restriction
-          (narrow-to-region beg end)
-          (font-lock-fontify-region beg end))))))
+  (indent-line-to (yajade-previous-line-indentation)))
 
 (defvar yajade-mode-map (make-sparse-keymap))
 
@@ -416,7 +307,7 @@ region defined by BEG and END."
 
   ;; modify the keymap
   (define-key yajade-mode-map [remap comment-dwim] 'yajade-comment-dwim)
-  (define-key yajade-mode-map [tab] 'yajade-indent)
+  (define-key yajade-mode-map (kbd "TAB") 'yajade-indent)
   (define-key yajade-mode-map [backtab] 'yajade-unindent)
   (define-key yajade-mode-map (kbd "RET") 'yajade-newline-and-indent)
 
