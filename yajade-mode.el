@@ -221,12 +221,15 @@ declaration"
       (forward-sexp 1)))
 
 (defun yajade-get-nearest-left-parent-parentheses-pos (&optional point)
-  "If not in parentheses, return nil"
+  "If cursor is not in parentheses, return nil"
   (let ((pos-list (nth 9 (syntax-ppss point))))
     (if pos-list
         (car (last pos-list)))))
 
-(defun yajade-get-target-indentation (&optional point)
+(defun yajade-get-tag-indentation (&optional point)
+  "Deal with a nested tag like this:
+   a(foo='aaa'
+     bar='bbb')"
   (save-excursion
     (if point (goto-char point))
     (forward-line -1)
@@ -241,7 +244,7 @@ declaration"
       (current-indentation))))
 
 (defun yajade-get-max-indentation (&optional point)
-  (+ yajade-tab-width (yajade-get-target-indentation point)))
+  (+ yajade-tab-width (yajade-get-tag-indentation point)))
 
 (defun yajade-get-current-indentation (&optional point)
   (save-excursion (goto-char point)
@@ -276,7 +279,7 @@ declaration"
   "Insert newline and indent to parent's indentation level."
   (interactive)
   (newline)
-  (indent-line-to (yajade-previous-line-indentation)))
+  (indent-line-to (yajade-get-tag-indentation)))
 
 (defvar yajade-mode-map (make-sparse-keymap))
 
@@ -298,7 +301,7 @@ declaration"
   (set (make-local-variable 'comment-start-skip) "//-\\s-*")
 
   (set (make-local-variable 'yajade-tab-width) 2)
-  (set (make-local-variable 'indent-line-function) 'yajade-indent-line)
+  (set (make-local-variable 'indent-line-function) 'yajade-indent)
   (set (make-local-variable 'indent-region-function) 'yajade-indent-region)
   (set (make-local-variable 'indent-tabs-mode) nil)
 
