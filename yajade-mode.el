@@ -220,16 +220,18 @@ declaration"
   (if (looking-at "(")
       (forward-sexp 1)))
 
-(defun yajade-get-nearest-left-parent-parentheses-pos (&optional point)
-  "If cursor is not in parentheses, return nil"
+(defun yajade-in-parentheses (&optional point)
+  "If cursor is in parentheses, return the position of left
+parentheses. Otherwise, return nil"
   (let ((pos-list (nth 9 (syntax-ppss point))))
     (if pos-list
         (car (last pos-list)))))
 
 (defun yajade-get-tag-indentation (&optional point)
   "Deal with a nested tag like this:
-   a(foo='aaa'
-     bar='bbb')"
+     hello(foo='aaa'
+           bar='bbb')
+   Return the indentation of <hello>"
   (save-excursion
     (if point (goto-char point))
     (forward-line -1)
@@ -237,25 +239,52 @@ declaration"
     (let (stop left-paren-pos)
       (while (not stop)
         (back-to-indentation)
-        (setq left-paren-pos (yajade-get-nearest-left-parent-parentheses-pos))
+        (setq left-paren-pos (yajade-in-parentheses))
         (if left-paren-pos
             (goto-char left-paren-pos)
           (setq stop t)))
       (current-indentation))))
 
+(defun yajade-get-attributes-indentation (&optional point)
+  "Two conditions:
+  [Condition A]
+  hello(
+    foo='aaa'
+    bar='bbb'
+    world='ccc')
+  [Condition B]
+  hello(foo='aaa'
+        bar='bbb'
+        world='ccc')
+"
+  (save-excursion
+    (if point (goto-char point))
+    (let* ((left-paren-pos (yajade-in-parentheses))
+           (first-char-pos (1+ left-paren-pos))
+           (first-char (char-after first-char-pos)))
+      (if (not left-paren-pos)
+          0
+        (if (eq first-char (string-to-char "\n"))
+            (+ yajade-tab-width (yajade-get-tag-indentation))  ; Condition A
+          (yajade-get-point-column first-char-pos) ; Condition B
+          )))))
+
 (defun yajade-get-max-indentation (&optional point)
   (+ yajade-tab-width (yajade-get-tag-indentation point)))
 
-(defun yajade-get-current-indentation (&optional point)
+(defun yajade-get-point-indentation (&optional point)
   (save-excursion (goto-char point)
                   (current-indentation)))
 
+(defun yajade-get-point-column (&optional point)
+  (save-excursion (goto-char point)
+                  (current-column)))
+
 (defun yajade-indent ()
   (interactive)
-  (let ((parent-parentheses-pos (yajade-get-nearest-left-parent-parentheses-pos)))
-    (if parent-parentheses-pos  ; if cursor is in a parentheses
-        (indent-line-to (save-excursion (goto-char parent-parentheses-pos)
-                                        (+ 1 (current-column))))
+  (let ((left-paren-pos (yajade-in-parentheses)))
+    (if left-paren-pos  ; if cursor is in a parentheses
+        (indent-line-to (yajade-get-attributes-indentation))
       (indent-line-to (min (+ yajade-tab-width (current-indentation))
                            (yajade-get-max-indentation))))))
 
@@ -279,7 +308,11 @@ declaration"
   "Insert newline and indent to parent's indentation level."
   (interactive)
   (newline)
-  (indent-line-to (yajade-get-tag-indentation)))
+  (if (yajade-in-parentheses)
+      (progn
+        (indent-line-to (yajade-get-attributes-indentation))
+        (message "%s" (yajade-get-attributes-indentation)))
+    (indent-line-to (yajade-get-tag-indentation))))
 
 (defvar yajade-mode-map (make-sparse-keymap))
 
