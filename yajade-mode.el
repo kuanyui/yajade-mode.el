@@ -285,13 +285,17 @@ parentheses. Otherwise, return nil"
   (let ((left-paren-pos (yajade-in-parentheses)))
     (if left-paren-pos  ; if cursor is in a parentheses
         (indent-line-to (yajade-get-attributes-indentation))
-      (indent-line-to (min (+ yajade-tab-width (current-indentation))
-                           (yajade-get-max-indentation))))))
+      (indent-line-to (yajade-correct-indentation (min (+ yajade-tab-width (current-indentation))
+                                                       (yajade-get-max-indentation)))))))
+
+(defun yajade-correct-indentation (indent)
+  (- indent (% indent yajade-tab-width)))
 
 (defun yajade-unindent ()
   "Unindent active region or current line."
   (interactive)
-  (indent-line-to (max 0 (- (current-indentation) yajade-tab-width))))
+  (indent-line-to (yajade-correct-indentation
+                   (max 0 (- (current-indentation) yajade-tab-width)))))
 
 (defun yajade-previous-line-indentation ()
   "Get the indentation of the previous (non-blank) line (from point)."
