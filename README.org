@@ -4,19 +4,21 @@
 
 ** Compare to =pug-mode= & =jade-mode=
 - Better (or less-mistakes) syntax-highlights than =pug-mode= and =jade-mode=. (see screenshot)
-- Compatible with [[https://github.com/purcell/mmm-mode][mmm-mode]]
+- Much smarter & stable & comphrehensive indentation hehaviors.
+- Fix a lot of stupid wrong syntax-table of =pug-mode=
 - No inline JS / CSS highlight (please use =mmm-mode= to achive this)
+- Compatible with [[https://github.com/purcell/mmm-mode][mmm-mode]]
 
 ** Screenshot
 [[file:screenshot.png]]
 
 ** Known Bugs
-- Emacs's syntax engine cannot deal with single-line string, it's uncustomizable and always match paired quotes across lines (doc: [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Syntax-Class-Table.html#Syntax-Class-Table][1]], [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Syntax-Flags.html#Syntax-Flags][2]]), so quote character in plain-text (e.g. =span() foo's bar=) will still be wrongly interpretered.
+- Emacs's syntax engine cannot deal with single-line string, it's inflexible and always match paired quotes across lines (doc: [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Syntax-Class-Table.html#Syntax-Class-Table][1]], [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Syntax-Flags.html#Syntax-Flags][2]]), so quote character in plain-text (e.g. =span() foo's bar=) will still be wrongly interpretered.
 #+BEGIN_QUOTE
 It's impossible to fix currently unless GNU Emacs improves its syntax APIs, or write a real parser to replace the rules for string quotes in syntax-class-table.
 #+END_QUOTE
 
-- [[http://jadelang.net/reference/code/][Buffered code]] is wrongly highlighted. I've ever tried to solve this with =yajade--font-lock-attr= function, but font-lock act more bizarre than JoJo's Bizarre Adventure.
+- [[http://jadelang.net/reference/code/][Buffered code]] is wrongly highlighted. I've ever tried to solve this with =yajade--font-lock-attr= function, but the behaviors of font-lock are more bizarre than JoJo's Bizarre Adventure.
 - Highlight for [[http://jadelang.net/reference/tags/][nested tags]] (e.g. =a: img=) is not handled. Same reason as =buffered code=.
 - Multi-line string block is not handled.
 - I found =yajade--font-lock-remove-highlights-in-plain= will still broke =mmm-mode= (see [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Search_002dbased-Fontification.html][Search-based Fontification in font-lock official doc]]) so I finally comment it out... (alas)

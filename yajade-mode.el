@@ -282,10 +282,15 @@ parentheses. Otherwise, return nil"
   (save-excursion (goto-char point)
                   (current-column)))
 
+(defun yajade-two-points-in-same-line (p1 p2)
+  (eq (line-number-at-pos p1) (line-number-at-pos p2)))
+
 (defun yajade-indent ()
   (interactive)
-  (let ((left-paren-pos (yajade-in-parentheses)))
-    (if left-paren-pos  ; if cursor is in a parentheses
+  (let* ((left-paren-pos (yajade-in-parentheses))
+         (at-first-line (yajade-two-points-in-same-line left-paren-pos (point))))
+    (if (and left-paren-pos            ; if cursor is in a parentheses
+             (not at-first-line))            ; not at first line of a tag
         (indent-line-to (yajade-get-attributes-indentation))
       (indent-line-to (yajade-correct-indentation (min (+ yajade-tab-width (current-indentation))
                                                        (yajade-get-max-indentation)))))))
@@ -322,7 +327,6 @@ parentheses. Otherwise, return nil"
 
 (defvar yajade-mode-map (make-sparse-keymap))
 
-;; mode declaration
 ;;;###autoload
 (define-derived-mode yajade-mode fundamental-mode
   "Yajade"
@@ -355,7 +359,6 @@ parentheses. Otherwise, return nil"
 
   ;; highlight keywords, ignore syntactic font-lock
   (setq font-lock-defaults '(yajade-font-lock-keywords nil nil)))
-
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.jade\\'" . yajade-mode))
