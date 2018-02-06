@@ -92,13 +92,15 @@
       (let ((table (make-syntax-table)))
         (modify-syntax-entry ?\" "\"" table)
         (modify-syntax-entry ?\' "\"" table)
-        (modify-syntax-entry ?_ "_" table)    ; _    is part of a symbol
-        (modify-syntax-entry ?- "_" table)    ; -    is part of a symbol
+        (modify-syntax-entry ?= "." table)        ; =    is not a part of a symbol (Don't use -, it will be deleted by `delete-trailing-whitespace')
+        (modify-syntax-entry ?$ "." table)        ; $    is not a part of a symbol
+        (modify-syntax-entry ?_ "_" table)        ; _    is part of a symbol
+        (modify-syntax-entry ?- "_" table)        ; -    is part of a symbol
         ;;;;(modify-syntax-entry ?/ "< 12" table) ; //   is begin of comment
-        (modify-syntax-entry ?/ ". 12" table) ; //   is begin of comment
-        (modify-syntax-entry ?\n "> " table)   ; \n   is end of comment
-        ;;(modify-syntax-entry ?  "' 1" table)   ; |    in begin of line is string
-        ;;(modify-syntax-entry ?| "' " table)   ; |    in begin of line is string
+        (modify-syntax-entry ?/ ". 12" table)     ; //   is begin of comment
+        (modify-syntax-entry ?\n "> " table)      ; \n   is end of comment
+        ;;(modify-syntax-entry ?  "' 1" table)    ; |    in begin of line is string
+        ;;(modify-syntax-entry ?| "' " table)     ; |    in begin of line is string
         ;;(modify-syntax-entry ?   "< 1c" table)
         ;;(modify-syntax-entry ?|  "< 2c" table)
         ;;(modify-syntax-entry ?\n "> c" table)
