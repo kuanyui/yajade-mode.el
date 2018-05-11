@@ -92,6 +92,7 @@
       (let ((table (make-syntax-table)))
         (modify-syntax-entry ?\" "\"" table)
         (modify-syntax-entry ?\' "\"" table)
+        (modify-syntax-entry ?\` "\"" table)
         (modify-syntax-entry ?= "." table)        ; =    is not a part of a symbol (Don't use -, it will be deleted by `delete-trailing-whitespace')
         (modify-syntax-entry ?$ "." table)        ; $    is not a part of a symbol
         (modify-syntax-entry ?_ "_" table)        ; _    is part of a symbol
@@ -126,7 +127,9 @@
 (defvar yajade-class-re "^ *\\(?:[#A-z0-9_-]*\\)?\\([.][a-zA-Z][0-9a-zA-Z_.-]*\\)")
 (defvar yajade-mixin-re "^ *[+][a-zA-Z][0-9a-zA-Z_-]*")
 (defvar yajade-tag-declaration-char-re "[-a-zA-Z0-9_.#+]")
-(defvar yajade-attr-re "\\([A-z_:.@-][A-z0-9_:.@-]*\\) *?= *?['\".0-9-A-z(]")
+
+;; New interpolation attribute syntax in pug. See `https://github.com/pugjs/pug/issues/2305'
+(defvar yajade-attr-re "\\([A-z_:.@-][A-z0-9_:.@-]*\\) *?!?= *?['\".0-9-A-z(]")
 
 (setq yajade-font-lock-keywords
       `(
@@ -148,7 +151,7 @@
         ("^ *[-]//\\(.+\\)" 1 font-lock-comment-face t)
         ("^!!!\\|doctype[ ]?.*" 0 font-lock-comment-face t)
         ;;(yajade--font-lock-remove-highlights-in-plain-text 1 nil t)  ;; this will cause mmm-mode error. Fuck.
-        ("#{.+?}" 0 font-lock-preprocessor-face t)
+        ("[#$]{.+?}" 0 font-lock-preprocessor-face t)
         ))
 
 (defun yajade--font-lock-attr (limit)
