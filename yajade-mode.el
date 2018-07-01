@@ -95,6 +95,7 @@
         (modify-syntax-entry ?\` "\"" table)
         (modify-syntax-entry ?= "." table)        ; =    is not a part of a symbol (Don't use -, it will be deleted by `delete-trailing-whitespace')
         (modify-syntax-entry ?$ "." table)        ; $    is not a part of a symbol
+        (modify-syntax-entry ?+ "." table)        ; +    is not a part of a symbol
         (modify-syntax-entry ?_ "_" table)        ; _    is part of a symbol
         (modify-syntax-entry ?- "_" table)        ; -    is part of a symbol
         ;;;;(modify-syntax-entry ?/ "< 12" table) ; //   is begin of comment
@@ -117,19 +118,17 @@
        "include" "yield" "mixin") 'words))
   "Yajade keywords.")
 
-(defvar yajade-tag-re "^ *\\([A-z][A-z0-9-_:]*\\)[( .#\n]")
+(setq yajade-tag-re "\\(?:^ *\\|#[[]\\)\\([A-z][A-z0-9-_:]*\\)[( .#\n]")
 
 ;;[TODO] unused. I think this should not be done with pure regexp.
 ;; However I have no interest to solve this currently because font-lock's API is so shitty.
 (defvar yajade-nested-tag-re "^ *\\(?:[A-z][A-z0-9-]*\\): *\\([A-z][A-z0-9-_:]*\\)*?(") ;  a: span()
 
-(defvar yajade-id-re "^ *\\(?:[A-z0-9._:-]*\\)?\\(#[a-zA-Z_-][0-9a-zA-Z_-]*\\)")
-(defvar yajade-class-re "^ *\\(?:[#A-z0-9_-]*\\)?\\([.][a-zA-Z][0-9a-zA-Z_.-]*\\)")
-(defvar yajade-mixin-re "^ *[+][a-zA-Z][0-9a-zA-Z_-]*")
-(defvar yajade-tag-declaration-char-re "[-a-zA-Z0-9_.#+]")
-
-;; New interpolation attribute syntax in pug. See `https://github.com/pugjs/pug/issues/2305'
-(defvar yajade-attr-re "\\([A-z_:.@-][A-z0-9_:.@-]*\\) *?!?= *?['\".0-9-A-z(]")
+(setq yajade-id-re "\\(?:^ *\\|#[[]\\)\\(?:[A-z0-9._:-]*\\)?\\(#[a-zA-Z_-][0-9a-zA-Z_-]*\\)")
+(setq yajade-class-re "\\(?:^ *\\|#[[]\\)\\(?:[#A-z0-9_-]*\\)?\\([.][a-zA-Z][0-9a-zA-Z_.-]*\\)")
+(setq yajade-mixin-re "\\(?:^ *\\|#[[]\\)[+][a-zA-Z][0-9a-zA-Z_-]*")
+(setq yajade-tag-declaration-char-re "[-a-zA-Z0-9_.#+]")
+(setq yajade-attr-re "\\([A-z_:.@-][A-z0-9_:.@-]*\\) *?= *?['\".0-9-A-z(]")
 
 (setq yajade-font-lock-keywords
       `(
@@ -278,11 +277,11 @@ parentheses. Otherwise, return nil"
   (+ yajade-tab-width (yajade-get-tag-indentation point)))
 
 (defun yajade-get-point-indentation (&optional point)
-  (save-excursion (goto-char point)
+  (save-excursion (goto-char (or point (point)))
                   (current-indentation)))
 
 (defun yajade-get-point-column (&optional point)
-  (save-excursion (goto-char point)
+  (save-excursion (goto-char (or point (point)))
                   (current-column)))
 
 (defun yajade-two-points-in-same-line (p1 p2)
@@ -306,6 +305,17 @@ parentheses. Otherwise, return nil"
   (interactive)
   (indent-line-to (yajade-correct-indentation
                    (max 0 (- (current-indentation) yajade-tab-width)))))
+
+(defun yajade-backspace ()
+  "More convenient; and Shift-TAB won't work on new Konsole."
+  (interactive)
+  (if (and (< (yajade-get-point-column) (yajade-get-point-indentation))
+           (not (bolp)))
+      (indent-line-to (yajade-get-point-indentation)))
+  (if (and (> (yajade-get-point-column) 0)
+           (eq (yajade-get-point-column) (yajade-get-point-indentation)))
+      (yajade-unindent)
+    (call-interactively #'backward-delete-char-untabify)))
 
 (defun yajade-previous-line-indentation ()
   "Get the indentation of the previous (non-blank) line (from point)."
@@ -358,6 +368,7 @@ parentheses. Otherwise, return nil"
   (define-key yajade-mode-map [remap comment-dwim] 'yajade-comment-dwim)
   (define-key yajade-mode-map (kbd "TAB") 'yajade-indent)
   (define-key yajade-mode-map [backtab] 'yajade-unindent)
+  (define-key yajade-mode-map (kbd "DEL") 'yajade-backspace)
   (define-key yajade-mode-map (kbd "RET") 'yajade-newline-and-indent)
 
   ;; highlight keywords, ignore syntactic font-lock
