@@ -126,7 +126,7 @@
 
 (setq yajade-id-re "\\(?:^ *\\|#[[]\\)\\(?:[A-z0-9._:-]*\\)?\\(#[a-zA-Z_-][0-9a-zA-Z_-]*\\)")
 (setq yajade-class-re "\\(?:^ *\\|#[[]\\)\\(?:[#A-z0-9_-]*\\)?\\([.][a-zA-Z][0-9a-zA-Z_.-]*\\)")
-(setq yajade-mixin-re "\\(?:^ *\\|#[[]\\)[+][a-zA-Z][0-9a-zA-Z_-]*")
+(setq yajade-mixin-re "\\(?:^ *\\|#[[]\\)[+][a-zA-Z_][0-9a-zA-Z_-]*")
 (setq yajade-tag-declaration-char-re "[-a-zA-Z0-9_.#+]")
 (setq yajade-attr-re "\\([A-z_:.@-][A-z0-9_:.@-]*\\) *?= *?['\".0-9-A-z(]")
 
@@ -134,14 +134,17 @@
       `(
         (,yajade-keywords 0 font-lock-keyword-face)
         (,yajade-attr-re 1 font-lock-variable-name-face t) ; order is significant. Don't move it unless you've tested it.
+        ("var +\\([A-Za-z0-9_]+\\)" 1 font-lock-variable-name-face t)
         ;; (yajade--font-lock-attr 1 font-lock-variable-name-face)
+        ("&attributes" 0 font-lock-preprocessor-face)
         ("<.+?>" . font-lock-function-name-face)
         (,yajade-tag-re 1 font-lock-function-name-face)
         (,yajade-class-re 1 font-lock-type-face t)
         (,yajade-id-re 1 font-lock-keyword-face t)
-        (,yajade-mixin-re 0 font-lock-constant-face)
+        (,yajade-mixin-re 0 font-lock-preprocessor-face)
+        (,yajade-mixin-parameters-re 1 font-lock-variable-name-face)
         ("^ *mixin" 0 font-lock-keyword-face t)
-        ("^ *mixin +\\([A-z_-][A-z0-9_-]*\\)" 1 font-lock-constant-face t)
+        ("^ *mixin +\\([A-z_-][A-z0-9_-]*\\)" 1 font-lock-preprocessor-face t)
         ("disabled" 0 font-lock-warning-face)
         ("\\(?:false\\|null\\|true\\|undefined\\)" 0 font-lock-constant-face)
         ("[-+]?\\(?:[0-9]+[.][0-9]+\\|[.]?[0-9]+\\)" 0 font-lock-constant-face)
