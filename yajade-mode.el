@@ -113,7 +113,7 @@
 (defconst yajade-keywords
   (eval-when-compile
     (regexp-opt
-     '("if" "else" "for" "in" "each" "case" "when" "default" "block" "extends" "var"
+     '("if" "else" "for" "in" "each" "case" "when" "default" "block" "extends" "var" "while"
        "block append" "block prepend" "append" "prepend"
        "include" "yield" "mixin") 'words))
   "Yajade keywords.")
@@ -142,7 +142,6 @@
         (,yajade-class-re 1 font-lock-type-face t)
         (,yajade-id-re 1 font-lock-keyword-face t)
         (,yajade-mixin-re 0 font-lock-preprocessor-face)
-        (,yajade-mixin-parameters-re 1 font-lock-variable-name-face)
         ("^ *mixin" 0 font-lock-keyword-face t)
         ("^ *mixin +\\([A-z_-][A-z0-9_-]*\\)" 1 font-lock-preprocessor-face t)
         ("disabled" 0 font-lock-warning-face)
